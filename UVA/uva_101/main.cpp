@@ -45,7 +45,6 @@ void print() {
 }
 
 int main() {
-	//freopen("input.txt", "r", stdin);
 	cin >> n;
 	//³õÊ¼»¯Ä¾¿é
 	for (int i = 0; i < n; i++) {
