@@ -10,7 +10,6 @@ int main() {
 	else if (L == 2)
 		printf("2\n1\n");
 	else {
-
 		int weight = 2;//背包的质数和,算上特例的2
 		int count = 1;//背包中的质数个数，算上特例的2
 		//求质数
