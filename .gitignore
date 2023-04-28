@@ -17,6 +17,12 @@ bin-release/
 *.txt
 *.exe
 *.sln
+*.bin
+*.cmake
+*.xml
+*.iml
+*.ninja
+*.log
 *.vcxproj
 *.filters
 *.user
