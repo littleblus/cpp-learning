@@ -12,6 +12,18 @@ int main() {
 	d1.print();
 	d1 = d2 += 3;
 	d1.print();
+	Date d3(2003, 9, 19);
+	Date d4 = d3;
+	if (d4 >= d3)
+		cout << ">=" << endl;
+	if (d4 <= d3)
+		cout << "<=" << endl;
+	d3++;
+	if (d4 > d3)
+		cout << ">" << endl;
+	d4 += 365;
+	if (d4 > d3)
+		cout << ">" << endl;
 	
 	return 0;
 }
