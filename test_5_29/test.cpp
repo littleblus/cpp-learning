@@ -66,6 +66,89 @@ public:
 class Solution {
 public:
 	string reverseWords(string s) {
+		int prev(0), cur(0);
+		int back = s.find(' ');
+		if (back == string::npos) {
+			reverse(s.begin(), s.end());
+			return s;
+		}
+		while (true) {
+			reverse(s.begin() + prev, s.begin() + back);
+			prev = back + 1;
+			back = s.find(' ', prev);
+			if (back == string::npos) {
+				reverse(s.begin() + prev, s.end());
+				break;
+			}
+		}
+		return s;
+	}
+};
 
+
+
+//https://leetcode-cn.com/problems/multiply-strings/description/
+// 字符串相乘
+class Solution {
+public:
+	string addStrings(string num1, string num2) {
+		int i((int)num1.size() - 1), j((int)num2.size() - 1);
+		int sum(0), carry(0);
+		string ret;
+		while (i >= 0 || j >= 0) {
+			int tmp = (i >= 0 ? num1[i] - '0' : 0) + (j >= 0 ? num2[j] - '0' : 0) + carry;
+			if (tmp > 9) {
+				carry = tmp / 10;
+				tmp %= 10;
+			}
+			else
+				carry = 0;
+			ret += '0' + tmp;
+			i--, j--;
+		}
+		if (carry != 0)//处理残余进位
+			ret += '0' + carry;
+		reverse(ret.begin(), ret.end());
+		//消零
+		while (ret.front() == '0' && ret.size() > 1) {
+			ret.erase(ret.begin());
+		}
+		return ret;
+	}
+
+	string multiply(string num1, string num2) {
+		string ret;
+		int len1 = (int)num1.size() - 1;
+		int j = (int)num2.size() - 1;
+		//用第二个数的每一位依次相乘第一个数整体
+		while (j >= 0) {
+			int carry(0), k((int)num2.size() - j - 1);//数位
+			for (int i = len1; i >= 0; i--) {
+				int tmp = (num1[i] - '0') * (num2[j] - '0') + carry;//单数相乘
+				carry = tmp / 10;
+				tmp %= 10;//进位
+				string add;//创建一个带数位的计算结果string
+				add += tmp + '0';
+				for (int n = k++; n > 0; n--) {
+					add += '0';
+				}
+				ret = addStrings(ret, add);//调用字符串相加
+			}
+			if (carry != 0) {//处理残余进位
+				string add;
+				add += carry + '0';
+				for (int n = k; n > 0; n--) {
+					add += '0';
+				}
+				ret = addStrings(ret, add);
+				carry = 0;
+			}
+			j--;
+		}
+		//消零
+		while (ret.front() == '0' && ret.size() > 1) {
+			ret.erase(ret.begin());
+		}
+		return ret;
 	}
 };
