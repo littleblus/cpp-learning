@@ -5,7 +5,7 @@
 using namespace std;
 
 //https://www.nowcoder.com/practice/1277c681251b4372bdef344468e4f26e?tpId=13&&tqId=11202&rp=6&ru=/activity/oj&qru=/ta/coding-interviews/question-ranking
-// ×Ö·û´®×ªÕûÐÎÊý×Ö
+// å­—ç¬¦ä¸²è½¬æ•´å½¢æ•°å­—
 class Solution {
 public:
 	int StrToInt(string str) {
@@ -32,11 +32,11 @@ public:
 
 
 //https://leetcode-cn.com/problems/add-strings/
-// ×Ö·û´®Ïà¼Ó
+// å­—ç¬¦ä¸²ç›¸åŠ 
 class Solution {
 public:
 	string addStrings(string num1, string num2) {
-		int i(num1.size() - 1), j(num2.size() - 1);
+		int i((int)num1.size() - 1), j((int)num2.size() - 1);
 		int sum(0), carry(0);
 		string ret;
 		while (i >= 0 || j >= 0) {
@@ -50,9 +50,13 @@ public:
 			ret += '0' + tmp;
 			i--, j--;
 		}
-		if (carry != 0)
+		if (carry != 0)//å¤„ç†æ®‹ä½™è¿›ä½
 			ret += '0' + carry;
 		reverse(ret.begin(), ret.end());
+		//æ¶ˆé›¶
+		while (ret.front() == '0' && ret.size() > 1) {
+			ret.erase(ret.begin());
+		}
 		return ret;
 	}
 };
@@ -60,19 +64,19 @@ public:
 
 
 //https://leetcode.cn/problems/reverse-string/
-// ·­×ª×Ö·û´®
+// ç¿»è½¬å­—ç¬¦ä¸²
 class Solution {
 public:
-    void reverseString(vector<char>& s) {
-        int i(0), j(s.size() - 1);
-        while (i < j) swap(s[i], s[j]), i++, j--;
-    }
+	void reverseString(vector<char>& s) {
+		int i(0), j(s.size() - 1);
+		while (i < j) swap(s[i], s[j]), i++, j--;
+	}
 };
 
 
 
 //https://leetcode.cn/problems/first-unique-character-in-a-string/
-// ÕÒ×Ö·û´®ÖÐµÚÒ»¸öÖ»³öÏÖÒ»´ÎµÄ×Ö·û
+// æ‰¾å­—ç¬¦ä¸²ä¸­ç¬¬ä¸€ä¸ªåªå‡ºçŽ°ä¸€æ¬¡çš„å­—ç¬¦
 class Solution {
 public:
 	int firstUniqChar(string s) {
