@@ -29,8 +29,9 @@ bin-release/
 *.suo
 *.db
 *.ipch
-Debug/
 .vs
+.vscode
+Debug/
 Release/
 
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
