@@ -125,3 +125,35 @@ public:
 		return king;
 	}
 };
+
+
+
+// 电话号码的字母组合
+//https://leetcode.cn/problems/letter-combinations-of-a-phone-number/description/、
+class Solution {
+	const string phone[10] = { "","","abc","def","ghi","jkl","mno","pqrs","tuv","wxyz" };
+	vector<string> ret;
+	string s;
+
+	// 回溯算法
+	void dfs(const string& digits, int index) {
+		if (index == digits.size()) {
+			ret.push_back(s);
+			return;
+		}
+		int letter = digits[index] - '0';
+		for (int i = 0; i < phone[letter].size(); i++) {
+			s += phone[letter][i];
+			dfs(digits, index + 1);
+			s.pop_back();
+		}
+	}
+public:
+	vector<string> letterCombinations(string digits) {
+		if (digits.size() == 0) {
+			return ret;
+		}
+		dfs(digits, 0);
+		return ret;
+	}
+};
