@@ -28,6 +28,7 @@ public:
 			cur = next;
 		}
 		fast = prev;
+		delete guard;
 		while (head && fast) {
 			if (head->val != fast->val)
 				return false;
