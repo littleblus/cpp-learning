@@ -14,18 +14,18 @@ namespace blus {
 	};
 
 	template<typename T>
-	class list {
+	class list {// 类模板在类中使用时既可以写类名又可以写类型
 	public:
 		// list construct
-		list() {
+		void emptyInit() {
 			_head = new Node;
 			_head->_next = _head;
 			_head->_prev = _head;
+			_size = 0;
 		}
+		list() { emptyInit(); }
 		list(const list<T>& other) { 
-			_head = new Node;
-			_head->_next = _head;
-			_head->_prev = _head;
+			emptyInit();
 			*this = other; 
 		}
 		list<T>& operator=(const list<T>& other) {
@@ -37,52 +37,39 @@ namespace blus {
 			return *this;
 		}
 		~list() {
-			if (empty()) {
-				delete _head;
-			}
-			else {
-				Node* cur(_head), * next(_head->_next);
-				while (next != _head) {
-					delete cur;
-					cur = next;
-					next = next->_next;
-				}
-			}
+			clear();
+			delete _head;
 		}
 
 		// list iterator
-		template<typename T>
+		template<typename T, typename Ref, typename Ptr>
 		struct __list_iterator {
 			typedef list_node<T> Node;
+			typedef __list_iterator<typename T, typename Ref, typename Ptr> self;
 			Node* _node;
 
 			__list_iterator(Node* node) :_node(node) {}
-			T& operator*() { return _node->_data; }
-			__list_iterator<T>& operator++() {
+			Ref operator*() const { return _node->_data; }
+			Ptr operator->() const { return &(_node->_data); }
+			self& operator++() {
 				_node = _node->_next;
 				return *this;
 			}
-			__list_iterator<T> operator++(int) {
+			self operator++(int) {
 				auto tmp = *this;
 				_node = _node->_next;
-				return tmp;
-			}
-			__list_iterator<T>& operator--() {
-				_node = _node->_prev;
-				return *this;
-			}
-			__list_iterator<T> operator--(int) {
-				auto tmp = *this;
-				_node = _node->_prev;
 				return tmp;
 			}
 
-			bool operator!=(const __list_iterator<T>& other) const { return _node != other._node; }
+			bool operator!=(const self& other) const { return _node != other._node; }
 		};
-		typedef __list_iterator<T> iterator;
+		typedef __list_iterator<T, T&, T*> iterator;
 		//typedef const __list_iterator<T> const_iterator;  这样设计const迭代器行吗？
+		typedef __list_iterator<T, const T&, const T*> const_iterator;
 		iterator begin() { return _head->_next; }
+		const_iterator begin() const { return _head->_next; }
 		iterator end() { return _head; }
+		const_iterator end() const { return _head; }
 
 		// elements access
 		T& front() {
@@ -104,15 +91,7 @@ namespace blus {
 
 		// list capacity
 		bool empty() const { return _head->_next == _head; }
-		size_t size() const {
-			size_t sz = 0;
-			Node* cur = _head->_next;
-			while (cur != _head) {
-				sz++;
-				cur = cur->_next;
-			}
-			return sz;
-		}
+		size_t size() const { return _size; }
 
 		// list modify
 		void push_back(const T& val) { insert(_head, val); }
@@ -123,19 +102,27 @@ namespace blus {
 			Node* newNode = new Node(val, pos._node->_prev, pos._node);
 			pos._node->_prev->_next = newNode;
 			pos._node->_prev = newNode;
-			return pos;
+			_size++;
+			return newNode;
 		}
 		iterator erase(iterator pos) {
-			assert(!empty());
+			assert(!empty() && pos != end());
 			Node* next = pos._node->_next;
 			pos._node->_prev->_next = next;
 			next->_prev = pos._node->_prev;
 			delete pos._node;
+			_size--;
 			return next;
+		}
+		void clear() { while (!empty()) pop_back(); }
+		void swap(list<T>& other) {
+			std::swap(_head, other._head);
+			std::swap(_size, other._size);
 		}
 
 	private:
 		typedef list_node<T> Node;
 		Node* _head;
+		size_t _size;
 	};
 }
