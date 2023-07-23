@@ -5,6 +5,7 @@ namespace blus {
 	template<class T, class container = std::vector<T>, class compare = std::less<T>>
 	class priority_queue {
 		void adjustUp(int child) {
+			compare _com;
 			int parent = (child - 1) / 2;
 			while (child > 0) {
 				if (_com(_con[child], _con[parent])) {
@@ -19,6 +20,7 @@ namespace blus {
 		}
 
 		void adjustDown(int parent) {
+			compare _com;
 			int child = parent * 2 + 1;// ×óº¢×Ó
 			while (child < _con.size()) {
 				if (child + 1 < _con.size() && _com(_con[child + 1], _con[child]))
@@ -35,7 +37,7 @@ namespace blus {
 		}
 	public:
 		// constructor
-		priority_queue() : _con(container()), _com(compare()) {}
+		priority_queue() : _con(container()) {}
 		template<class InputIterator>
 		priority_queue(InputIterator first, InputIterator last) {
 			while (first != last) {
@@ -63,6 +65,5 @@ namespace blus {
 		}
 	private:
 		container _con;
-		compare _com;
 	};
 }
