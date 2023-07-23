@@ -13,6 +13,77 @@ namespace blus {
 			:_prev(prev), _next(next), _data(val) {}
 	};
 
+	template<typename T, typename Ref, typename Ptr>
+	struct __list_iterator {
+		typedef list_node<T> Node;
+		typedef __list_iterator<T, Ref, Ptr> self;
+		Node* _node;
+
+		__list_iterator(Node* node) :_node(node) {}
+		Ref operator*() { return _node->_data; }
+		Ptr operator->() { return &(_node->_data); }
+		self& operator++() {
+			_node = _node->_next;
+			return *this;
+		}
+		self operator++(int) {
+			auto tmp = *this;
+			_node = _node->_next;
+			return tmp;
+		}
+
+		self& operator--() {
+			_node = _node->_prev;
+			return *this;
+		}
+		self operator--(int) {
+			auto tmp = *this;
+			_node = _node->_prev;
+			return tmp;
+		}
+
+		bool operator!=(const self& other) const { return _node != other._node; }
+		bool operator==(const self& other) const { return _node == other._node; }
+	};
+
+	template<class Iterator, class Ref, class Ptr>
+	struct __list_reverse_iterator {
+		typedef __list_reverse_iterator<Iterator, Ref, Ptr> self;
+		Iterator _it;
+		__list_reverse_iterator(Iterator it) : _it(it) {}
+
+		Ref operator*() {
+			Iterator tmp = _it;
+			return *(--tmp);
+		}
+		Ptr operator->() {
+			return &(operator*());
+		}
+
+		self& operator++() {
+			--_it;
+			return *this;
+		}
+		self operator++(int) {
+			self tmp = *this;
+			--_it;
+			return tmp;
+		}
+
+		self& operator--() {
+			++_it;
+			return *this;
+		}
+		self operator--(int) {
+			self tmp = *this;
+			++_it;
+			return tmp;
+		}
+
+		bool operator!=(const self& other) const { return _it != other._it; }
+		bool operator==(const self& other) const { return _it == other._it; }
+	};
+
 	template<typename T>
 	class list {// 类模板在类中使用时既可以写类名又可以写类型
 	public:
@@ -42,34 +113,20 @@ namespace blus {
 		}
 
 		// list iterator
-		template<typename T, typename Ref, typename Ptr>
-		struct __list_iterator {
-			typedef list_node<T> Node;
-			typedef __list_iterator<typename T, typename Ref, typename Ptr> self;
-			Node* _node;
-
-			__list_iterator(Node* node) :_node(node) {}
-			Ref operator*() const { return _node->_data; }
-			Ptr operator->() const { return &(_node->_data); }
-			self& operator++() {
-				_node = _node->_next;
-				return *this;
-			}
-			self operator++(int) {
-				auto tmp = *this;
-				_node = _node->_next;
-				return tmp;
-			}
-
-			bool operator!=(const self& other) const { return _node != other._node; }
-		};
 		typedef __list_iterator<T, T&, T*> iterator;
+		typedef __list_reverse_iterator<iterator, T&, T*> reverse_iterator;
 		//typedef const __list_iterator<T> const_iterator;  这样设计const迭代器行吗？
 		typedef __list_iterator<T, const T&, const T*> const_iterator;
+		typedef __list_reverse_iterator<const_iterator, const T&, const T*> const_reverse_iterator;
+
 		iterator begin() { return _head->_next; }
 		const_iterator begin() const { return _head->_next; }
 		iterator end() { return _head; }
 		const_iterator end() const { return _head; }
+		reverse_iterator rbegin() { return end(); }
+		const_reverse_iterator rbegin() const { return end(); }
+		reverse_iterator rend() { return begin(); }
+		const_reverse_iterator rend() const { return begin(); }
 
 		// elements access
 		T& front() {

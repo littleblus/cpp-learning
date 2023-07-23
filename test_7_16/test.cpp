@@ -13,6 +13,16 @@ void printlt(const blus::list<T>& lt) {
 	cout << endl;
 }
 
+template<typename T>
+void rprintlt(const blus::list<T>& lt) {
+	auto it = lt.rbegin();
+	while (it != lt.rend()) {
+		cout << *it << ' ';
+		++it;
+	}
+	cout << endl;
+}
+
 struct A {
 	A(int a = 0, int b = 0) 
 		: a(a)
@@ -36,7 +46,7 @@ int main() {
 	lt1.push_back(20);
 	lt1.push_back(30);
 	lt1.push_back(40);
-	printlt(lt1);
+	rprintlt(lt1);
 	cout << lt1.size() << endl;
 
 	return 0;
