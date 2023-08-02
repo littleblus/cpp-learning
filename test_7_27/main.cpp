@@ -31,8 +31,31 @@ void test1() {
 	tree.printInOrder();
 }
 
+void test2() {
+	int arr[10]{ 8,12,3,79,34,67,88,25,9,30 };
+	BSTree<int> tree;
+	for (auto e : arr) {
+		tree.insert(e);
+	}
+	tree.printInOrder();
+}
+
+void test3() {
+	int arr[10]{ 8,12,3,79,34,67,88,25,9,30 };
+	BSTree<int> tree;
+	for (auto e : arr) {
+		tree.insert(e);
+	}
+	tree.printInOrder();
+
+	BSTree<int> treeCopy(tree);
+	treeCopy.printInOrder();
+}
+
 int main() {
-	test1();
+	//test1();
+	//test2();
+	test3();
 
 	return 0;
 }

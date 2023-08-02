@@ -22,6 +22,19 @@ public:
 		:_root(nullptr)
 	{}
 
+	BSTree(const BSTree& other) {
+		*this = other;
+	}
+
+	BSTree& operator=(const BSTree& other) {
+		_root = copy(other._root);
+		return *this;
+	}
+
+	~BSTree() {
+		destroy(_root);
+	}
+
 	bool insert(const K& key) {
 		if (!_root)
 			_root = new Node(key);
@@ -125,5 +138,22 @@ private:
 		_printInOrder(node->_left);
 		std::cout << node->_key << ' ';
 		_printInOrder(node->_right);
+	}
+
+	void destroy(Node* root) {
+		if (!root)
+			return;
+		destroy(root->_left);
+		destroy(root->_right);
+		delete root;
+	}
+
+	Node* copy(Node* root) {
+		if (!root)
+			return nullptr;
+		Node* newNode = new Node(root->_key);
+		newNode->_left = copy(root->_left);
+		newNode->_right = copy(root->_right);
+		return newNode;
 	}
 };
