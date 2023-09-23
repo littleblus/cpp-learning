@@ -24,68 +24,105 @@ class AVLtree {
 	typedef AVLtreeNode<T> Node;
 
 	void rotateR(Node* root) {
-		assert(root);
+		Node* cur = root->_left;
+		Node* curright = cur->_right;
+		root->_left = curright;
+		if (curright)
+			curright->_father = root;
+		cur->_right = root;
 		Node* parent = root->_father;
+		root->_father = cur;
 		if (parent == nullptr) {
-			// update _root
-			_root = root->_left;
-			_root->_father = nullptr;
-			root->_left = nullptr;
-			root->_father = _root;
-		}
-		else if (parent->_left == root) {
-			parent->_left = root->_left;
-			parent->_left->_father = parent;
-			root->_father = parent->_left;
-			root->_left = nullptr;
+			_root = cur;
+			cur->_father = nullptr;
 		}
 		else {
-			parent->_right = root->_left;
-			parent->_right->_father = parent;
-			root->_father = parent->_right;
-			root->_left = nullptr;
+			if (parent->_left == root)
+				parent->_left = cur;
+			else // right
+				parent->_right = cur;
+			cur->_father = parent;
 		}
+		root->_bf = cur->_bf = 0;
 	}
 
 	void rotateL(Node* root) {
-		assert(root);
+		Node* cur = root->_right;
+		Node* curleft = cur->_left;
+		root->_right = curleft;
+		if (curleft)
+			curleft->_father = root;
+		cur->_left = root;
 		Node* parent = root->_father;
+		root->_father = cur;
 		if (parent == nullptr) {
-			// update _root
-			_root = root->_right;
-			_root->_father = nullptr;
-			root->_right = nullptr;
-			root->_father = _root;
-		}
-		else if (parent->_left == root) {
-			parent->_left = root->_right;
-			parent->_left->_father = parent;
-			root->_father = parent->_left;
-			root->_right = nullptr;
+			_root = cur;
+			cur->_father = nullptr;
 		}
 		else {
-			parent->_right = root->_right;
-			parent->_right->_father = parent;
-			root->_father = parent->_right;
-			root->_right = nullptr;
+			if (parent->_left == root)
+				parent->_left = cur;
+			else // right
+				parent->_right = cur;
+			cur->_father = parent;
 		}
+		root->_bf = cur->_bf = 0;
 	}
 
 	void rotateRL(Node* root) {
-		Node* tmp = root->_right->_left;
-		int& bf = tmp->_bf;
-		rotateR(root->_right);
+		Node* cur = root->_right; // 需要右旋的节点，此时bf为-1
+		Node* curleft = cur->_left;
+		int bf = curleft->_bf;
+		rotateR(cur);
 		rotateL(root);
-		if (abs(bf) == 1)
-			bf *= -1;
+		switch (bf) {
+		case 0:
+			cur->_bf = 0;
+			curleft->_bf = 0;
+			root->_bf = 0;
+			break;
+		case 1:
+			cur->_bf = 0;
+			curleft->_bf = 0;
+			root->_bf = -1;
+			break;
+		case -1:
+			cur->_bf = 1;
+			curleft->_bf = 0;
+			root->_bf = 0;
+			break;
+		default:
+			assert(false);
+			break;
+		}
 	}
 
 	void rotateLR(Node* root) {
-		int bf = root->_left->_right->_bf;
-		rotateR(root->_left);
-		rotateL(root);
-		if (abs(bf) == 1)
-			bf *= -1;
+		Node* cur = root->_left; // 需要左旋的节点，此时bf为1
+		Node* curright = cur->_right;
+		int bf = curright->_bf;
+		rotateL(cur);
+		rotateR(root);
+		switch (bf) {
+		case 0:
+			cur->_bf = 0;
+			curright->_bf = 0;
+			root->_bf = 0;
+			break;
+		case 1:
+			cur->_bf = -1;
+			curright->_bf = 0;
+			root->_bf = 0;
+			break;
+		case -1:
+			cur->_bf = 0;
+			curright->_bf = 0;
+			root->_bf = 1;
+			break;
+		default:
+			assert(false);
+			break;
+		}
 	}
 
 	void printInorder_core(Node* root) {
@@ -101,7 +138,7 @@ class AVLtree {
 			return true;
 		else {
 			int bf = height(root->_right) - height(root->_left);
-			if (abs(bf) > 1) {
+			if (bf != root->_bf || abs(bf) > 1) {
 				std::cout << "平衡因子异常：" << root->_val << " -> " << bf << std::endl;
 				return false;
 			}
@@ -130,8 +167,10 @@ public:
 		}
 		// insert
 		cur = new Node(val);
-		if (parent == nullptr)
+		if (parent == nullptr) {
 			_root = cur;
+			return true;
+		}
 		else if (val < parent->_val) {
 			parent->_left = cur;
 		}
@@ -156,18 +195,18 @@ public:
 			else if (parent->_bf == 2) {
 				if (cur->_bf == 1)
 					rotateL(parent); // 对parent进行左单旋
-				else // -1
+				else if (cur->_bf == -1)
 					rotateRL(parent); // 先右单旋，再左单旋
-				parent->_bf = cur->_bf = 0;
+				break;
 			}
 			else if (parent->_bf == -2) {
-				if (cur->_bf == -1) // 对parent进行右单旋
-					rotateR(parent);
-				else // 1
+				if (cur->_bf == -1)
+					rotateR(parent); // 对parent进行右单旋
+				else if (cur->_bf == 1)
 					rotateLR(parent); // 先左单旋，再右单旋
-				parent->_bf = cur->_bf = 0;
+				break;
 			}
-			else if (abs(parent->_bf) > 2)
+			else
 				assert(false);
 		}
 
