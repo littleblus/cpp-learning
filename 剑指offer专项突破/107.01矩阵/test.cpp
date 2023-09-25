@@ -23,7 +23,20 @@ public:
 		while (!que.empty()) {
 			int posr = que.front().first;
 			int posc = que.front().second;
+			que.pop();
+			int dis = ret[posr][posc];
+			for (auto& mv : move) {
+				int r = posr + mv.first;
+				int c = posc + mv.second;
+				if (r >= 0 && r < ROW && c >= 0 && c < COL) {
+					if (ret[r][c] > dis + 1) {
+						ret[r][c] = dis + 1;
+						que.push({ r,c });
+					}
+				}
+			}
 		}
+		return ret;
 	}
 };
 
