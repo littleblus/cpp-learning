@@ -3,21 +3,20 @@
 
 using namespace std;
 
-struct key {
-	int operator()(int key) {
-		return key;
+struct keyoft {
+	string operator()(const pair<const string, string>& key) {
+		return key.first;
 	}
 };
 
 int main() {
-	vector<int> v{ 26,46,23,6,9,13,6,34,798,23,18,19,44,5,78 };
-	blus::hashTable<int, int, key> table;
-	for (auto e : v) {
-		table.insert(e);
-	}
+	openHash::hashTable<string, pair<const string, string>, keyoft> table;
+	table.insert({ "ÅÅĞò","xxx" });
+	table.insert({ "Æ»¹û","xxx" });
+	table.insert({ "Ïã½¶","xxx" });
 	table.print();
-	cout << table.erase(26) << endl;
-	cout << table.erase(999) << endl;
+	auto cur = table.find("ÅÅĞò");
+	cur->_val.second = "sort";
 	table.print();
 
 	return 0;
