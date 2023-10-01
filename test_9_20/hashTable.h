@@ -171,6 +171,22 @@ namespace openHash {
 			return end();
 		}
 
+		const_iterator find(const keyType& key) const {
+			KeyOfT kot;
+			hashFunc hash;
+			size_t hashi = hash(key) % _table.size();
+			if (_table[hashi]) {
+				Node* cur = _table[hashi];
+				while (cur) {
+					if (kot(cur->_val) == key)
+						return iterator(this, cur);
+					else
+						cur = cur->_next;
+				}
+			}
+			return end();
+		}
+
 		bool erase(const keyType& key) {
 			hashFunc hash;
 			iterator target = find(key);

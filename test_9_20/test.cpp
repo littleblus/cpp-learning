@@ -30,11 +30,14 @@ void test2() {
 	map1.insert({ 1,2 });
 	map1.insert({ 2,3 });
 	map1.insert({ 4,5 });
-	auto it = map1.find(4);
-	cout << it->first << ':' << it->second << endl;
+	auto it1 = map1.find(4);
+	cout << it1->first << ':' << it1->second << endl;
 	blus::unordered_map<string, string> map2;
 	map2.insert({ "Ïã½¶", "banana" });
+	const blus::unordered_map<string, string> map3 = map2;
 	cout << map2["Ïã½¶"] << endl;
+	auto it2 = map3.find("Ïã½¶");
+	it2->second = "xxx";
 }
 
 void test3() {
@@ -52,8 +55,8 @@ void test3() {
 
 int main() {
 	//test1();
-	//test2();
-	test3();
+	test2();
+	//test3();
 
 	return 0;
 }
