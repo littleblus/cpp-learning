@@ -71,63 +71,80 @@ namespace blus {
 			}
 			else {
 				// 需要进行调整
-				if (prev->_father == _pHead) {
+				// cur为当前节点，prev为父节点，g为祖父节点，u为叔叔节点
+				cur = add;
+				Node* p = prev, * g = prev->_father;
+				Node* u = g->_left == p ? g->_right : g->_left;
+				if (g == _pHead) {
 					// 这种情况（根节点）为红是不可能的，直接报错
 					std::cout << "RBTree error: root is RED!" << std::endl;
 					assert(false);
 				}
-				while (prev->_father != _pHead && prev->_father->_col == RED &&
-					prev->_col == RED) {
-					// 判断prev兄弟节点的位置
-					Node* uncle = prev->_father->_left == prev ?
-						prev->_father->_right :
-						prev->_father->_left;
-					if (uncle->_col == RED) {
-						// 情况一：cur为红，prev为红，prev兄弟节点为红，则向上调整
-						prev->_col = BLACK;
-						uncle->_col = BLACK;
-						prev->_father->_col = RED;
-						// 向上
-						prev = prev->_father;
-					}
-					else {
-						// 情况二：cur为红，prev为红，prev兄弟节点为黑，则需要旋转
-						if (prev->_father->_right == uncle) {
-							if (prev->_left == cur) {
-								// prev在左侧，cur在prev左侧
-								RotateR(prev->_father);
-								// 调整颜色
-								prev->_col = uncle->_col = BLACK;
-								prev->_left->_col = prev->_right->_col = RED;
-							}
-							else {
-								// prev在左侧，cur在prev右侧
-								prev = RotateL(prev);
-								Node* pp = RotateR(prev->_father);
-								// 调整颜色
-								pp->_col = uncle->_col = BLACK;
-								pp->_left->_col = pp->_right->_col = RED;
-							}
+			adjust:
+				else if(u && u->_col == RED) {
+					// 叔叔节点存在且为红
+					// 将父节点和叔叔节点染黑，祖父节点染红
+					p->_col = BLACK;
+					u->_col = BLACK;
+					g->_col = RED;
+					// 将祖父节点作为新的插入节点，继续调整
+					cur = g;
+					p = cur->_father;
+					g = p->_father;
+					u = g->_left == p ? g->_right : g->_left;
+					goto adjust;
+				}
+				else {
+					// 叔叔节点不存在或为黑
+					if (p == g->_left) {
+						// 父节点为祖父节点的左孩子
+						if (cur == p->_left) {
+							// 新节点为父节点的左孩子
+							// 将父节点染黑，祖父节点染红
+							p->_col = BLACK;
+							g->_col = RED;
+							// 将祖父节点右旋
+							g = RotateR(g);
 						}
 						else {
-							if (prev->_left == cur) {
-								// prev在右侧，cur在prev左侧
-								prev = RotateR(prev);
-								Node* pp = RotateL(prev->_father);
-								// 调整颜色
-								pp->_col = uncle->_col = BLACK;
-								pp->_left->_col = pp->_right->_col = RED;
-							}
-							else {
-								// prev在右侧，cur在prev右侧
-								RotateL(prev->_father);
-								// 调整颜色
-								prev->_col = uncle->_col = BLACK;
-								prev->_left->_col = prev->_right->_col = RED;
-							}
+							// 新节点为父节点的右孩子
+							// 将新节点作为父节点，继续调整
+							cur = p;
+							p = cur->_father;
+							g = p->_father;
+							// 将父节点左旋
+							p = RotateL(p);
+							// 将父节点染黑，祖父节点染红
+							p->_col = BLACK;
+							g->_col = RED;
+							// 将祖父节点右旋
+							g = RotateR(g);
 						}
-						// 旋转之后不需要继续向上了，跳出循环
-						break;
+					}
+					else {
+						// 父节点为祖父节点的右孩子
+						if (cur == p->_right) {
+							// 新节点为父节点的右孩子
+							// 将父节点染黑，祖父节点染红
+							p->_col = BLACK;
+							g->_col = RED;
+							// 将祖父节点左旋
+							g = RotateL(g);
+						}
+						else {
+							// 新节点为父节点的左孩子
+							// 将新节点作为父节点，继续调整
+							cur = p;
+							p = cur->_father;
+							g = p->_father;
+							// 将父节点右旋
+							p = RotateR(p);
+							// 将父节点染黑，祖父节点染红
+							p->_col = BLACK;
+							g->_col = RED;
+							// 将祖父节点左旋
+							g = RotateL(g);
+						}
 					}
 				}
 			}
