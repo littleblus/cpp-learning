@@ -1,5 +1,4 @@
 #pragma once
-#include <assert.h>
 #include <iostream>
 
 namespace blus {
@@ -16,17 +15,98 @@ namespace blus {
 		RBTreeNode(const T& val = T(), color col = RED) : _val(val), _col(col) {}
 	};
 
+	// K代表key的类型，T代表value的类型（const key、const key-value）
+	// keyOfT代表从T中获取key的方法
+	// Comp代表比较key的方法
 	template<class K, class T, class KeyOfT, class Comp> 
 	class RBTree {
+	private:
+		typedef K keyType;
+		typedef T valueType;
 		typedef RBTreeNode<T> Node;
 
+		template<class Ref, class Ptr>
+		struct __RBTreeIterator {
+		public:
+			typedef __RBTreeIterator<Ref, Ptr> Self;
+
+			__RBTreeIterator(Node* nptr, const RBTree* tptr) : _node(nptr), _tree(tptr) {}
+
+			Ref operator*() { return _node->_val; }
+			Ptr operator->() { return &(_node->_val); }
+
+			Self& operator++() {
+				if (_node == _tree->RightMost()) {
+					_node = _tree->_pHead; // 回到守卫节点，代表end
+				}
+				else {
+					// 如果有右子树，找右子树的最左侧节点
+					if (_node->_right) {
+						_node = _node->_right;
+						while (_node->_left) {
+							_node = _node->_left;
+						}
+					}
+					else {
+						// 如果没有右子树，找第一个祖先节点，该节点的左子树包含该节点
+						Node* parent = _node->_father;
+						while (_node != _tree->_pHead && _node == parent->_right) {
+							_node = parent;
+							parent = parent->_father;
+						}
+						_node = parent;
+					}
+				}
+				return *this;
+			}
+
+			Self& operator--() {
+				if (_node == _tree->_pHead) {
+					_node = _tree->RightMost();
+				}
+				else {
+					// 如果有左子树，找左子树的最右侧节点
+					if (_node->_left) {
+						_node = _node->_left;
+						while (_node->_right) {
+							_node = _node->_right;
+						}
+					}
+					else {
+						// 如果没有左子树，找第一个祖先节点，该节点的右子树包含该节点
+						Node* parent = _node->_father;
+						while (_node != _tree->_pHead && _node == parent->_left) {
+							_node = parent;
+							parent = parent->_father;
+						}
+						_node = parent;
+					}
+				}
+				return *this;
+			}
+
+			bool operator==(const Self& it) { return _node == it._node; }
+			bool operator!=(const Self& it) { return _node != it._node; }
+		private:
+			Node* _node;
+			const RBTree* _tree;
+		};
 	public:
+
+		typedef __RBTreeIterator<valueType&, valueType*> iterator;
+		typedef __RBTreeIterator<const valueType&, const valueType*> const_iterator;
+
 		RBTree()
-			: _pHead(new Node(T(), BLACK))
+			: _pHead(new Node(valueType(), BLACK))
 			, _isModify(true) {
 		}
 
-		std::pair<Node*, bool> Insert(const T& data) {
+		iterator begin() { return iterator(LeftMost(), this); }
+		const_iterator begin() const { return const_iterator(LeftMost(), this); }
+		iterator end() { return iterator(_pHead, this); }
+		const_iterator end() const { return const_iterator(_pHead, this); }
+
+		std::pair<iterator, bool> Insert(const valueType& data) {
 			Comp com;
 			KeyOfT kot;
 			Node* cur = GetRoot();
@@ -42,7 +122,7 @@ namespace blus {
 				}
 				else {
 					// 相等，即已存在该节点
-					return { cur,false };
+					return { iterator(cur, this), false };
 				}
 			}
 			// 新的节点，颜色默认为红色
@@ -121,36 +201,56 @@ namespace blus {
 			// 将根节点颜色归位
 			_pHead->_father->_col = BLACK;
 			_isModify = true;
-			return { add,true };
+			return { iterator(add, this) ,true };
 		}
 
-		Node* Find(const T& data) {
+		iterator Find(const keyType& key) {
+			Comp com;
+			KeyOfT kot;
 			Node* cur = GetRoot();
 			while (cur) {
-				if (data < cur->_val) {
+				if (com(key, kot(cur->_val))) {
 					cur = cur->_left;
 				}
-				else if (cur->_val < data) {
+				else if (com(kot(cur->_val), key)) {
 					cur = cur->_right;
 				}
 				else {
-					return cur;
+					return iterator(cur, this);
 				}
 			}
-			return nullptr;
+			return end();
 		}
 
-		Node* LeftMost() {
+		const_iterator Find(const keyType& key) const {
+			Comp com;
+			KeyOfT kot;
+			Node* cur = GetRoot();
+			while (cur) {
+				if (com(key, kot(cur->_val))) {
+					cur = cur->_left;
+				}
+				else if (com(kot(cur->_val), key)) {
+					cur = cur->_right;
+				}
+				else {
+					return const_iterator(cur, this);
+				}
+			}
+			return end();
+		}
+
+		Node* LeftMost() const {
 			refreshMost();
 			return _pHead->_left;
 		}
 
-		Node* RightMost() {
+		Node* RightMost() const {
 			refreshMost();
 			return _pHead->_right;
 		}
 
-		bool IsValidRBTree() {
+		bool IsValidRBTree() const {
 			Node* root = GetRoot();
 			if (!root) return true;
 			if (root->_col == RED) return false;
@@ -166,13 +266,13 @@ namespace blus {
 			return _IsValidRBTree(root, blackCount, 0);
 		}
 
-		void PrintInOrder() {
+		void PrintInOrder() const {
 			_printinorder(GetRoot());
 			std::cout << "\n";
 		}
 
 	private:
-		bool _IsValidRBTree(Node* pRoot, const size_t& blackCount, size_t pathBlack) {
+		bool _IsValidRBTree(Node* pRoot, const size_t& blackCount, size_t pathBlack) const {
 			// 判断是否是红黑树
 			if (pRoot == nullptr) {
 				if (blackCount == pathBlack) {
@@ -245,16 +345,16 @@ namespace blus {
 			return root;
 		}
 
-		Node*& GetRoot() { return _pHead->_father; }
+		Node*& GetRoot() const { return _pHead->_father; }
 
-		void _printinorder(Node* root) {
+		void _printinorder(Node* root) const {
 			if (root == nullptr) return;
 			_printinorder(root->_left);
 			std::cout << root->_val.second << " ";
 			_printinorder(root->_right);
 		}
 
-		void refreshMost() {
+		void refreshMost() const {
 			if (_isModify) {
 				Node* root = GetRoot();
 				Node* cur = root;
@@ -272,6 +372,6 @@ namespace blus {
 		}
 	private:
 		Node* _pHead;
-		bool _isModify;
+		mutable bool _isModify;
 	};
 }  // namespace blus
