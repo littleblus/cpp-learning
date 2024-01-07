@@ -19,10 +19,11 @@ public:
 	size_t setNode_counts(int root) { return _data[root] < 0 ? -_data[root] : 0; }
 
 	int findRoot(int x) {
-		while (_data[x] >= 0) {
-			x = _data[x];
+		// 路径压缩
+		if (_data[x] >= 0) {
+			_data[x] = findRoot(_data[x]);
 		}
-		return x;
+		return _data[x] < 0 ? x : _data[x];
 	}
 
 	void merge(int a, int b) {
