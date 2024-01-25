@@ -17,7 +17,11 @@ int main() {
 	std::vector<Thread> threads;
 
 	for (int i = 0;i < 10; i++) {
-		threads.push_back(Thread(reinterpret_cast<callback_t>(Print)));
+		threads.emplace_back(reinterpret_cast<callback_t>(Print));
+	}
+
+	for (auto& t : threads) {
+		t.create();
 	}
 
 	for (auto& t : threads) {
