@@ -13,8 +13,7 @@ bin-release/
 *.ipa
 *.apk
 
-#过滤掉不想要文件和文件夹
-*.txt
+# 过滤掉不想要文件和文件夹
 *.exe
 *.sln
 *.bin
