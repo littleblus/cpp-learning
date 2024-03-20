@@ -34,12 +34,20 @@ namespace blus {
 			return _t.Insert(val);
 		}
 
+		size_t erase(const keyType& key) {
+			return _t.Erase(key);
+		}
+
 		iterator find(const keyType& key) {
 			return _t.Find(key);
 		}
 
 		const_iterator find(const keyType& key) const {
 			return _t.Find(key);
+		}
+
+		size_t size() const {
+			return _t.Size();
 		}
 	private:
 		RBTree<keyType, valueType, __map_KeyOfT<keyType, valueType>, Comp> _t;

@@ -15,8 +15,7 @@ public:
 };
 
 void test1() {
-	RBTree<int, pair<int, int>, 
-		koft<pair<int, int>>, less<int>> tree;
+	RBTree<int, pair<int, int>, koft<pair<int, int>>, less<int>> tree;
 	tree.Insert(make_pair(10, 10));
 	tree.Insert(make_pair(2, 2));
 	tree.Insert(make_pair(5, 5));
@@ -29,7 +28,6 @@ void test1() {
 }
 
 void test2() {
-	// 测试迭代器
 	RBTree<int, pair<int, int>, koft<pair<int, int>>, less<int>> tree;
 	tree.Insert(make_pair(10, 10));
 	tree.Insert(make_pair(2, 2));
@@ -72,10 +70,36 @@ void test3() {
 	cout << m.find(5)->second << endl;
 }
 
+void test4() {
+	map<int, int> m;
+	for (int i = 0; i < 100; i++) {
+		m[i] = i + 1;
+	}
+	m.erase(33);
+	for (auto& e : m) {
+		cout << e.first << " : " << e.second << endl;
+	}
+	cout << endl;
+	m.erase(88);
+	for (auto& e : m) {
+		cout << e.first << " : " << e.second << endl;
+	}
+	cout << endl;
+	for (int i = 35; i < 55; i++) {
+		m.erase(i);
+	}
+	for (auto& e : m) {
+		cout << e.first << " : " << e.second << endl;
+	}
+	cout << endl;
+	cout << m.size() << endl;
+}
+
 int main() {
 	//test1();
 	//test2();
-	test3();
+	//test3();
+	test4();
 
 	return 0;
 }

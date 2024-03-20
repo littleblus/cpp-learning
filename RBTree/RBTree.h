@@ -13,6 +13,16 @@ namespace blus {
 		RBTreeNode* _right = nullptr;
 
 		RBTreeNode(const T& val = T(), color col = RED) : _val(val), _col(col) {}
+
+		RBTreeNode* sibling() {
+			if (!_father) return nullptr;
+			if (_father->_left == this) {
+				return _father->_right;
+			}
+			else {
+				return _father->_left;
+			}
+		}
 	};
 
 	// K代表key的类型，T代表value的类型（const key、const key-value）
@@ -98,6 +108,7 @@ namespace blus {
 
 		RBTree()
 			: _pHead(new Node(valueType(), BLACK))
+			, _size(0)
 			, _isModify(true) {
 		}
 
@@ -105,6 +116,8 @@ namespace blus {
 		const_iterator begin() const { return const_iterator(LeftMost(), this); }
 		iterator end() { return iterator(_pHead, this); }
 		const_iterator end() const { return const_iterator(_pHead, this); }
+
+		size_t Size() const { return _size; }
 
 		std::pair<iterator, bool> Insert(const valueType& data) {
 			Comp com;
@@ -201,7 +214,19 @@ namespace blus {
 			// 将根节点颜色归位
 			_pHead->_father->_col = BLACK;
 			_isModify = true;
+			++_size;
 			return { iterator(add, this) ,true };
+		}
+
+		size_t Erase(const keyType& key) {
+			if (delete_child(GetRoot(), key)) {
+				--_size;
+				_isModify = true;
+				return 1;
+			}
+			else {
+				return 0;
+			}
 		}
 
 		iterator Find(const keyType& key) {
@@ -270,8 +295,164 @@ namespace blus {
 			_printinorder(GetRoot());
 			std::cout << "\n";
 		}
-
 	private:
+		Node* getSmallestChild(Node* p) {
+			if (p->_left == nullptr)
+				return p;
+			return getSmallestChild(p->_left);
+		}
+
+		void swapValueType(valueType& a, valueType& b) {
+			if (&a == &b) return;
+			// 临时存储用于交换的内存区
+			char temp[sizeof(a)];
+
+			// 使用memcpy交换a和b的内容
+			std::memcpy(temp, &a, sizeof(a));
+			std::memcpy(&a, &b, sizeof(b));
+			std::memcpy(&b, temp, sizeof(temp));
+		}
+
+		bool delete_child(Node* p, const keyType& key) {
+			Comp com;
+			KeyOfT kot;
+			if (com(key, kot(p->_val))) {
+				if (p->_left == nullptr) {
+					return false;
+				}
+				return delete_child(p->_left, key);
+			}
+			else if (com(kot(p->_val), key)) {
+				if (p->_right == nullptr) {
+					return false;
+				}
+				return delete_child(p->_right, key);
+			}
+			else { // 找到了
+				if (p->_right == nullptr) {
+					delete_one_child(p);
+					return true;
+				}
+				Node* smallest = getSmallestChild(p->_right);
+				// 交换p->_val和smallest->_val, 这两个是pair<const K, V>
+				swapValueType(p->_val, smallest->_val);
+				delete_one_child(smallest);
+
+				return true;
+			}
+		}
+
+		void delete_one_child(Node* p) {
+			Node* child = p->_left == nullptr ? p->_right : p->_left;
+			// child为空, 因为p是叶子节点, 直接删除
+			if (!child) {
+				if (p->_col == BLACK) {
+					delete_case(p);
+				}
+				if (p->_father) {
+					if (p == p->_father->_left) {
+						p->_father->_left = nullptr;
+					}
+					else {
+						p->_father->_right = nullptr;
+					}
+				}
+				delete p;
+				return;
+			}
+
+			if (p->_father == nullptr && p->_left == nullptr && p->_right == nullptr) {
+				p = nullptr;
+				GetRoot() = p;
+				return;
+			}
+
+			if (p->_father == nullptr) {
+				delete p;
+				child->_father = nullptr;
+				GetRoot() = child;
+				GetRoot()->_col = BLACK;
+				return;
+			}
+
+			if (p->_father->_left == p) {
+				p->_father->_left = child;
+			}
+			else {
+				p->_father->_right = child;
+			}
+			child->_father = p->_father;
+
+			if (p->_col == BLACK) {
+				if (child->_col == RED) {
+					child->_col = BLACK;
+				}
+				else {
+					delete_case(child);
+				}
+			}
+
+			delete p;
+		}
+
+		void delete_case(Node* p) {
+			if (p == GetRoot()) {
+				p->_col = BLACK;
+				return;
+			}
+			// sibling返回空
+			if (p->sibling() == nullptr) {
+				return;
+			}
+			if (p->sibling()->_col == RED) {
+				p->_father->_col = RED;
+				p->sibling()->_col = BLACK;
+				if (p == p->_father->_left)
+					RotateL(p->_father);
+				else
+					RotateR(p->_father);
+			}
+			if (p->sibling() == nullptr) { // 有可能旋转后sibling为空
+				return;
+			}
+			if (p->_father->_col == BLACK && p->sibling()->_col == BLACK
+				&& p->sibling()->_left->_col == BLACK && p->sibling()->_right->_col == BLACK) {
+				p->sibling()->_col = RED;
+				delete_case(p->_father);
+			}
+			else if (p->_father->_col == RED && p->sibling()->_col == BLACK
+				&& p->sibling()->_left->_col == BLACK && p->sibling()->_right->_col == BLACK) {
+				p->sibling()->_col = RED;
+				p->_father->_col = BLACK;
+			}
+			else {
+				if (p->sibling()->_col == BLACK) {
+					if (p == p->_father->_left && p->sibling()->_left->_col == RED
+						&& p->sibling()->_right->_col == BLACK) {
+						p->sibling()->_col = RED;
+						p->sibling()->_left->_col = BLACK;
+						RotateR(p->sibling()->_left);
+					}
+					else if (p == p->_father->_right && p->sibling()->_left->_col == BLACK
+						&& p->sibling()->_right->_col == RED) {
+						p->sibling()->_col = RED;
+						p->sibling()->_right->_col = BLACK;
+						RotateL(p->sibling()->_right);
+					}
+				}
+				p->sibling()->_col = p->_father->_col;
+				p->_father->_col = BLACK;
+				if (p == p->_father->_left) {
+					p->sibling()->_right->_col = BLACK;
+					RotateL(p->sibling());
+				}
+				else {
+					p->sibling()->_left->_col = BLACK;
+					RotateR(p->sibling());
+				}
+			}
+		}
+
 		bool _IsValidRBTree(Node* pRoot, const size_t& blackCount, size_t pathBlack) const {
 			// 判断是否是红黑树
 			if (pRoot == nullptr) {
@@ -294,7 +475,7 @@ namespace blus {
 				return false;
 			}
 			return _IsValidRBTree(pRoot->_left, blackCount, pathBlack) &&
-				   _IsValidRBTree(pRoot->_right, blackCount, pathBlack);
+				_IsValidRBTree(pRoot->_right, blackCount, pathBlack);
 		}
 
 		Node* RotateL(Node* pParent) {
@@ -372,6 +553,7 @@ namespace blus {
 		}
 	private:
 		Node* _pHead;
+		size_t _size;
 		mutable bool _isModify;
 	};
-}  // namespace blus
+} // namespace blus
