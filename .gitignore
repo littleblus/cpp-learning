@@ -4,6 +4,7 @@ bin-release/
 cmake-build-debug/
 Debug/
 Release/
+build/
 [Oo]bj/
 [Bb]in/
 

@@ -308,9 +308,9 @@ namespace blus {
 			char temp[sizeof(a)];
 
 			// 使用memcpy交换a和b的内容
-			std::memcpy(temp, &a, sizeof(a));
-			std::memcpy(&a, &b, sizeof(b));
-			std::memcpy(&b, temp, sizeof(temp));
+			memcpy(temp, &a, sizeof(a));
+			memcpy(&a, &b, sizeof(b));
+			memcpy(&b, temp, sizeof(temp));
 		}
 
 		bool delete_child(Node* p, const keyType& key) {

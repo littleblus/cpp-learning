@@ -95,11 +95,30 @@ void test4() {
 	cout << m.size() << endl;
 }
 
+void test5() {
+	map<int, int> m;
+	for (int i = 0; i < 10000; i++) {
+		int r = rand() + i % 1000000;
+		m[r] = r;
+		if (i % 500 == 0) {
+			cout << "insert size = " << m.size() << endl;
+		}
+	}
+	for (int i = 0; i < 5000; i++) {
+		int r = rand() + i % 1000000;
+		m.erase(r);
+		if (i % 500 == 0) {
+			cout << "erase size = " << m.size() << endl;
+		}
+	}
+}
+
 int main() {
 	//test1();
 	//test2();
 	//test3();
-	test4();
+	//test4();
+	test5();
 
 	return 0;
 }
